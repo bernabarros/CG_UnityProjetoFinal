@@ -5,6 +5,7 @@ Shader "Custom/SSAO"
         _SSAORadius ("SSAO Radius", Float) = 1.0
         _SSAOBias ("SSAO Bias", Float) = 0.05
         _SSAOKernelSize ("Kernel Size", Int) = 32
+        _NoiseTex("Rotation/Noise Texture", 2D) = "white" {}
     }
 
     SubShader
@@ -31,6 +32,9 @@ Shader "Custom/SSAO"
 
             TEXTURE2D(_CameraNormalsTexture);
             SAMPLER(sampler_CameraNormalsTexture);
+
+            TEXTURE2D(_NoiseTex);
+            SAMPLER(sampler_NoiseTex);
 
             float _SSAORadius;
             float _SSAOBias;
@@ -82,8 +86,8 @@ Shader "Custom/SSAO"
                 float3 normalVS = SampleNormalVS(input.texcoord);
 
                 // 3. Pseudo-random rotation per pixel
-                float2 noise = frac(sin(dot(input.texcoord, float2(12.9898,78.233))) * 43758.5453);
-                float3 randomVec = normalize(float3(noise * 2.0 - 1.0, 0));
+                float2 noiseUV = input.texcoord * float2(_ScreenParams.x / 4.0, _ScreenParams.y / 4.0);
+                float3 randomVec = SAMPLE_TEXTURE2D_X(_NoiseTex, sampler_NoiseTex, noiseUV).xyz * 2.0 - 1.0;
 
                 // 4. Build tangent-space basis (TBN)
                 float3 tangent = normalize(randomVec - normalVS * dot(randomVec, normalVS));
@@ -93,7 +97,7 @@ Shader "Custom/SSAO"
                 // 5. Accumulate occlusion
                 float occlusion = 0.0;
 
-                //[unroll]
+                [unroll(32)]
                 for (int i = 0; i < _SSAOKernelSize; ++i)
                 {
                     // Random hemisphere sample
@@ -126,77 +130,6 @@ Shader "Custom/SSAO"
                 occlusion = 1.0 - occlusion / _SSAOKernelSize;
                 return half4(occlusion, occlusion, occlusion, 1.0);
             }
-
-            /*
-            half4 Frag(Varyings input) : SV_Target
-            {
-                // --- 1. Sample depth & reconstruct view-space position
-                float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, input.texcoord).r;
-                float3 viewPos = ReconstructViewPos(input.texcoord, rawDepth);
-
-                // --- 2. Sample normal in view space
-                float3 normalVS = SampleNormalVS(input.texcoord);
-
-                // --- 3. SSAO parameters
-                int kernelSize = _SSAOKernelSize;
-                float radius = _SSAORadius;
-                float bias = _SSAOBias;
-
-                // --- 4. Pseudo-random rotation vector per pixel
-                float2 noise = frac(sin(dot(input.texcoord ,float2(12.9898,78.233))) * 43758.5453);
-                float3 randomVec = normalize(float3(noise * 2.0 - 1.0, 0));
-
-                // --- 5. Build tangent-space basis (TBN)
-                float3 tangent = normalize(randomVec - normalVS * dot(randomVec, normalVS));
-                float3 bitangent = cross(normalVS, tangent);
-                float3x3 TBN = float3x3(tangent, bitangent, normalVS);
-
-                // --- 6. Generate kernel
-                float3 kernel[kernelSize];
-                [unroll]
-                for (int i = 0; i < kernelSize; ++i)
-                {
-                    // Random hemisphere sample
-                    float3 sample = normalize(float3(
-                        frac(sin(i*12.9898) * 43758.5453) * 2.0 - 1.0,
-                        frac(sin(i*78.233) * 43758.5453) * 2.0 - 1.0,
-                        frac(sin(i*34.567) * 43758.5453)
-                    ));
-
-                    // Scale to hemisphere & kernel index
-                    sample *= 0.25 + 0.75 * (i / float(kernelSize)); // ensures some reach
-                    kernel[i] = sample;
-                }
-
-                // --- 7. Accumulate occlusion
-                float occlusion = 0.0;
-                [unroll]
-                for (int i = 0; i < kernelSize; ++i)
-                {
-                    float3 sampleVS = mul(TBN, kernel[i]);   // rotate into tangent space
-                    sampleVS = viewPos + sampleVS * radius;  // move into view space
-
-                    // Project sample back to clip space
-                    float4 offsetClip = mul(unity_CameraProjection, float4(sampleVS, 1.0));
-                    offsetClip.xyz /= offsetClip.w;
-                    float2 sampleUV = offsetClip.xy * 0.5 + 0.5;
-
-                    // Sample depth
-                    float sampleDepthRaw = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, sampleUV).r;
-                    float3 sampleViewPos = ReconstructViewPos(sampleUV, sampleDepthRaw);
-
-                    // --- Z comparison fixed: forward is negative
-                    float rangeCheck = smoothstep(0.0, 1.0, radius / (length(sampleViewPos - viewPos)));
-                    occlusion += (sampleViewPos.z <= sampleVS.z - bias ? 1.0 : 0.0) * rangeCheck;
-                }
-
-                // --- 8. Normalize and invert
-                occlusion = 1.0 - occlusion / kernelSize;
-
-                // --- 9. Output AO
-                return half4(occlusion, occlusion, occlusion, 1.0);
-            }
-            */
             ENDHLSL
         }
     }
