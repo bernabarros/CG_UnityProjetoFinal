@@ -69,6 +69,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -118,8 +122,8 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _SSAOBias: 0.25
-    - _SSAOKernelSize: 64
+    - _SSAOBias: 0.025
+    - _SSAOKernelSize: 32
     - _SSAORadius: 0.75
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
