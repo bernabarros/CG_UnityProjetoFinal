@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5387839927312364681
+--- !u!114 &-6048722834900459100
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SSAO_Material
+  m_Name: SSAO
   m_Shader: {fileID: 4800000, guid: d9a02ef871e4370459c21e7545b0441b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
