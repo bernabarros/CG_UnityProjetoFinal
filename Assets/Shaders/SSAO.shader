@@ -75,7 +75,7 @@ Shader "Custom/SSAO"
 
                 return viewDir * linearDepth;
             }
-
+            /*
             half4 Frag(Varyings input) : SV_Target
             {
                 // 1. Sample depth & reconstruct view-space position
@@ -128,7 +128,69 @@ Shader "Custom/SSAO"
                 }
 
                 occlusion = 1.0 - occlusion / _SSAOKernelSize;
+                occlusion = saturate(occlusion);
                 return half4(occlusion, occlusion, occlusion, 1.0);
+            }
+            */
+            float ComputeAO(float2 uv)
+            {
+                float rawDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
+                float3 viewPos = ReconstructViewPos(uv, rawDepth);
+                float3 normalVS = SampleNormalVS(uv);
+
+                float2 noise = frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+                float3 randomVec = normalize(float3(noise * 2.0 - 1.0, 0));
+
+                float3 tangent = normalize(randomVec - normalVS * dot(randomVec, normalVS));
+                float3 bitangent = cross(normalVS, tangent);
+                float3x3 TBN = float3x3(tangent, bitangent, normalVS);
+
+                float occlusion = 0.0;
+
+                [unroll(32)]
+                for(int i = 0; i < 32; ++i)
+                {
+                    float3 sample = normalize(float3(
+                        frac(sin(i*12.9898)*43758.5453)*2-1,
+                        frac(sin(i*78.233)*43758.5453)*2-1,
+                        frac(sin(i*34.567)*43758.5453)
+                    ));
+
+                    sample *= 0.25 + 0.75 * (i / 32.0);
+                    float3 sampleVS = viewPos + mul(TBN, sample) * _SSAORadius;
+
+                    float4 clip = mul(unity_CameraProjection, float4(sampleVS,1));
+                    clip.xyz /= clip.w;
+                    float2 sampleUV = clip.xy * 0.5 + 0.5;
+
+                    float sampleDepthRaw = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, sampleUV).r;
+                    float3 sampleViewPos = ReconstructViewPos(sampleUV, sampleDepthRaw);
+
+                    float rangeCheck = smoothstep(0.0, 1.0, _SSAORadius / length(sampleViewPos - viewPos));
+                    occlusion += (sampleViewPos.z <= sampleVS.z - _SSAOBias ? 1.0 : 0.0) * rangeCheck;
+                }
+
+                return 1.0 - occlusion / 32.0;
+            }
+
+            // --- Simple 3x3 blur
+            float BlurAO(float2 uv)
+            {
+                float2 texelSize = 1.0 / _ScreenParams.xy;
+                float sum = 0.0;
+
+                [unroll(9)]
+                for(int x=-1;x<=1;x++)
+                    for(int y=-1;y<=1;y++)
+                        sum += ComputeAO(uv + float2(x,y) * texelSize);
+
+                return sum / 9.0;
+            }
+
+            half4 Frag(Varyings input) : SV_Target
+            {
+                float ao = BlurAO(input.texcoord);
+                return half4(ao, ao, ao, 1.0);
             }
             ENDHLSL
         }
