@@ -5,7 +5,7 @@ Shader "Custom/SSAO"
         _SSAORadius ("SSAO Radius", Float) = 0.6
         _SSAOBias ("SSAO Bias", Float) = 0.005
         _SSAOKernelSize ("Kernel Size", Int) = 32
-        _AO_Strength("AO Strength", Float) = 1
+        _AO_Strength("AO Strength", Float) = 2
         _NoiseTex("Rotation/Noise Texture", 2D) = "white" {}
     }
 
