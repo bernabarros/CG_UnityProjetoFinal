@@ -18,7 +18,7 @@ Shader "Custom/SSAO"
             ZTest Always
             Cull Off
             ZWrite Off
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend Off
 
             HLSLPROGRAM
 
@@ -134,10 +134,16 @@ Shader "Custom/SSAO"
             half4 Frag(Varyings input) : SV_Target
             {
                 float ao = BlurAO(input.texcoord);
-                float4 sceneColor = SAMPLE_TEXTURE2D_X(_CameraColorTexture, sampler_CameraColorTexture, input.texcoord);
-                float3 finalColor = sceneColor.rgb * lerp(1.0, ao, _AO_Strength);
-                return half4(finalColor, sceneColor.a);
+
+                // Sample original scene color
+                half4 sceneCol = SAMPLE_TEXTURE2D_X(_CameraColorTexture, sampler_CameraColorTexture, input.texcoord);
+
+                // Composite AO over scene color
+                sceneCol.rgb = lerp(sceneCol.rgb, sceneCol.rgb * ao, _AO_Strength);
+
+                return sceneCol;
             }
+
             ENDHLSL
         }
     }
