@@ -47,8 +47,8 @@ Shader "Custom/SSS"
             };
 
             // Textures
-            TEXTURE2D(_MainTex);
-            SAMPLER(sampler_MainTex);
+            TEXTURE2D(_BlitTexture);
+            SAMPLER(sampler_BlitTexture);
 
             // Matrices
             float4x4 _InverseViewProjectionMatrix;
@@ -124,7 +124,7 @@ Shader "Custom/SSS"
 
             float4 Frag (v2f i) : SV_Target // Fragment Shader
             {
-                float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv); // Sample original scene color
+                float4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, i.uv); // Sample original scene color
 
                 float depth = SampleSceneDepth(i.uv); // Sample depth buffer
                 
