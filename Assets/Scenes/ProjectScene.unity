@@ -1114,13 +1114,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540235342}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.713, y: 0.255, z: -3.15}
+  m_LocalRotation: {x: 0.30391428, y: -0, z: -0, w: 0.9526994}
+  m_LocalPosition: {x: -0.145, y: 3.11, z: -5.62}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 35.386, y: 0, z: 0}
 --- !u!1 &1556404619
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,6 +1132,7 @@ GameObject:
   - component: {fileID: 1556404622}
   - component: {fileID: 1556404621}
   - component: {fileID: 1556404620}
+  - component: {fileID: 1556404623}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1235,13 +1236,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556404619}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0.845, y: 2.768, z: -1.472}
+  m_LocalRotation: {x: 0.915407, y: -0.06273266, z: -0.24526036, w: 0.312957}
+  m_LocalPosition: {x: 2.89, y: 2.55, z: -2.79}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 147.16699, y: 35.53, z: 18.626007}
+--- !u!114 &1556404623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556404619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 186c5ea05b0c63e48a76ff3eb8115561, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sunLight: {fileID: 1556404621}
 --- !u!1 &1769538573
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,21 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7474167138724120240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 186c5ea05b0c63e48a76ff3eb8115561, type: 3}
-  m_Name: ContactShadowsFeature
-  m_EditorClassIdentifier: 
-  m_Active: 1
-  settings:
-    shaderMaterial: {fileID: 2100000, guid: 6275fd9a0f5aed642a659760ca878147, type: 2}
-    renderPassEvent: 550
 --- !u!114 &-7181249101339333843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,8 +44,8 @@ MonoBehaviour:
     probeVolumeBlendStatesCS: {fileID: 7200000, guid: b9a23f869c4fd45f19c5ada54dd82176, type: 3}
   m_RendererFeatures:
   - {fileID: 2886559717811662284}
-  - {fileID: -7474167138724120240}
-  m_RendererFeatureMap: ccad1d0bc51e0f2850797350966c4698
+  - {fileID: 4206783951976697725}
+  m_RendererFeatureMap: ccad1d0bc51e0f287d8f6240b77f613a
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -99,11 +83,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
   m_Name: FullScreenPassRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   injectionPoint: 600
   fetchColorBuffer: 0
   requirements: 3
   passMaterial: {fileID: 2100000, guid: 4c3de14994c117f4f83890347089f856, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+--- !u!114 &4206783951976697725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: FullScreenPassRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 1
+  requirements: 1
+  passMaterial: {fileID: 2100000, guid: 910aabaa687711b48bf0a047685f2da0, type: 2}
   passIndex: 0
   bindDepthStencilAttachment: 0
   m_Version: 1
