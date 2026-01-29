@@ -1,4 +1,5 @@
 # Relatório Trabalho Final de Computação Gráfica
+
 ### Realizado por: Bernardo Barros a22401588 Simão Durão a22408594
 
 ## Introdução
@@ -15,14 +16,52 @@ Por sua vez, Screen Space Shadows (Contact Shadows) é uma técnica de funcionam
 Estas técnicas serão implementadas em Unity, mais precisamente em HLSL/ShaderLab.
 
 ---
+
 ## Implementação
 
-O nosso objetivo seria implementar as técnicas de modo a que certas zonas sejam escurecidas através AO, por exemplo as zonas em que as paredes interceptam com o chão e ao aplicar uma luz direta, possamos observar sombras como as quais obtidas através de Screen Space Shadows.
+O nosso objetivo seria implementar as técnicas de modo a que certas zonas sejam escurecidas através de Ambient Occlusion, por exemplo as zonas em que as paredes interceptam com o chão e ao aplicar uma luz direta, possamos observar sombras como as quais obtidas através de Screen Space Shadows.
 
+Para implementar Ambient Occlusion, nós temos de responder a uma questão, o quão ocluído um ponto no espaço está resultando numa menor incidência de luz ambiente resultando no escurecimento do ponto.
 
-![alt text](image-7.png)
+Neste sentido, iremos precisar dos valores de profundidade de todos os pontos da cena para testar se estão incobertos por outros objetos e as normais, que determinarão as direções nas quais uma específica suprefície.
 
-Esta imagem é a representação de um debug normal Shader utilizado para SSAO.
+![SSAO_Shader_1](image-8.png)
+![SSAO_Shader_2](image-9.png)
+
+Também teremos de determinar as posições de cada pixel.
+
+![SSAO_Shader_3](image-10.png)
+![SSAO_Shader_4](image-11.png)
+
+Para evitar que apareçam padrões no efeito, iremos aplicar uma rotação a cada sample.
+
+![SSAO_Shader_5](image-12.png)
+
+O kernel irá gerar direções semi aleatórias para testar por obstruções.
+
+![SSAO_Shader_6](image-13.png)
+
+Se o teste verificar uma obstrução o valor de oclusão irá aumentar e após todas as samples serem feitas é returnado um fator de Ambient Occlusion.
+
+![SSAO_Shader_7](image-14.png)
+
+Aplicamos um blur ao efeito para melhor o aspeto visual
+
+![SSAO_Shader_8](image-15.png)
+
+Finalmente aplicamos o fator sobre a cena.
+
+![SSAO_Shader_9](image-16.png)
+
+Obtemos o seguinte resultado.
+
+![SSAO_Shader_10](image-17.png)
+
+Podemos ajustar o efeito através dos seguintes parámetros.
+
+![SSAO_Shader_11](image-18.png)
+
+Com este shader criamos um material que fará uso do mesmo e adicionamos um FullScreenPassRendererFeature ao Renderer principal que utilizará o material do shader.
 
 Para a implementação da técnica de Screen Space Shadows (SSS), partimos com o objetivo de simular o bloqueio da luz direta pelas paredes. Queríamos garantir que ao projetar uma luz direcional nas paredes, as paredes projetassem umas sombras.
 
@@ -44,11 +83,6 @@ Encontra-mos também exemplos de SSAO e SSS,
 
 ![alt text](image-2.png)
 ![alt text](image-3.png)
-
-### Screen Space Ambient Occlusion
-
-![alt text](image-4.png)
-![alt text](image-5.png)
 
 ## Conclusão
 
