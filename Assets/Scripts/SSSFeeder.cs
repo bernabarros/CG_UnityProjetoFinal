@@ -26,6 +26,7 @@ public class SSSFeeder : MonoBehaviour
             Matrix4x4 invViewProj = viewProj.inverse; // Calculate Inverse View-Projection Matrix
 
             Shader.SetGlobalMatrix("_CustomInvViewProj", invViewProj);
+            Shader.SetGlobalVector("_CustomCamPos", cam.transform.position);
         }
     }
 }

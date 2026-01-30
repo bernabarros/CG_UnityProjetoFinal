@@ -1,17 +1,24 @@
 # Relatório Trabalho Final de Computação Gráfica
 
-### Realizado por: Bernardo Barros a22401588 Simão Durão a22408594
+## Realizado por: Bernardo Barros a22401588 Simão Durão a22408594
 
 ## Introdução
 
-Neste relatório descrevemos o trabalho realizado no âmbito da cadeira de Computação Gráfica no intiuto de implementar as técnicas de Ambient Occlusion e Screen Space Shadows.
+Neste relatório descrevemos o trabalho realizado no âmbito da cadeira de Computação Gráfica no intiuto de implementar as técnicas de *Ambient Occlusion* e *Screen Space Shadows*.
 
-Ambient Occlusion é uma técnica em que certas zonas do mundo que, por exemplo cantos, são escurecidas devido à menor incidência de luz. É obtida através do lançamento de raios de amostra que ao embaterem com geometria próxima iram indicar o certo de oclusão que depois é aplicado à superfície.
+*Ambient Occlusion* é uma técnica em que certas zonas do mundo que, por exemplo cantos, são escurecidas devido à menor incidência de luz. É obtida através do lançamento de raios de amostra que ao embaterem com geometria próxima iram indicar o certo de oclusão que depois é aplicado à superfície.
 
 ![SSAO](image.png)
 
-Por sua vez, Screen Space Shadows (Contact Shadows) é uma técnica de funcionamento semelhante ao Ambient Occlusion, porém aqui é tida em conta um ponto de luz direto e não um valor de luz ambiente.
-![alt text](image-1.png)
+Por sua vez, *Screen Space Shadows* (*Contact Shadows*) é uma técnica de funcionamento semelhante ao *Ambient Occlusion*, porém aqui é tida em conta um ponto de luz direto e não um valor de luz ambiente.
+
+**Sem *Contact Shadows* ativas.**
+
+![alt text](image-19.png)
+
+***Contact Shadows* ativas.**
+
+![alt text](image-20.png)
 
 Estas técnicas serão implementadas em Unity, mais precisamente em HLSL/ShaderLab.
 
@@ -19,7 +26,7 @@ Estas técnicas serão implementadas em Unity, mais precisamente em HLSL/ShaderL
 
 ## Implementação
 
-O nosso objetivo seria implementar as técnicas de modo a que certas zonas sejam escurecidas através de Ambient Occlusion, por exemplo as zonas em que as paredes interceptam com o chão e ao aplicar uma luz direta, possamos observar sombras como as quais obtidas através de Screen Space Shadows.
+O nosso objetivo seria implementar as técnicas de modo a que certas zonas sejam escurecidas através de *Ambient Occlusion*, por exemplo as zonas em que as paredes interceptam com o chão e ao aplicar uma luz direta, possamos observar sombras como as quais obtidas através de Screen Space Shadows.
 
 Para implementar Ambient Occlusion, nós temos de responder a uma questão, o quão ocluído um ponto no espaço está resultando numa menor incidência de luz ambiente resultando no escurecimento do ponto.
 
@@ -71,9 +78,8 @@ Na segunda, criamos o shader e o material para SSS, no inicio, estavamos bastant
 
 Na terceira acabamos por descobrir o que era Raymarching e que é essencial para SSS. Isso permite de enviar raios da posição do pixel para a luz e se houver pixeis que bloqueiam esse raio esse pixel será um *shadow pixel*. No shader usa um Depth buffer já que ele não tem acesso á cena em 3D. Por isso, ele recontroi os pixeis da que aparecem na camara para 3D assim pode ver se a luz foi obstruida por um pixel.
 
-![alt text](image-6.png)
 
-Esta imagem seria a representação de um Depth Map para SSS.
+![alt text](image-21.png)
 
 A partir dessa ultima tentativa, a implementação de Contact Shadow foi fluida, ao criar um script para o shader saber onde está a camâra e a directional light. Esse script cria uma matriz que manda para o shader a direção da luz e como ele deveria agir sobre isso.
 
@@ -82,7 +88,6 @@ Encontra-mos também exemplos de SSAO e SSS,
 ### Screen Space Shadows
 
 ![alt text](image-2.png)
-![alt text](image-3.png)
 
 ## Conclusão
 
