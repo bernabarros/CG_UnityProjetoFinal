@@ -83,13 +83,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
   m_Name: FullScreenPassRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 0
-  injectionPoint: 600
-  fetchColorBuffer: 0
-  requirements: 3
-  passMaterial: {fileID: 2100000, guid: 4c3de14994c117f4f83890347089f856, type: 2}
+  m_Active: 1
+  injectionPoint: 550
+  fetchColorBuffer: 1
+  requirements: 7
+  passMaterial: {fileID: 2100000, guid: 9f06272e0dc022845af56c6754a7e111, type: 2}
   passIndex: 0
-  bindDepthStencilAttachment: 0
+  bindDepthStencilAttachment: 1
   m_Version: 1
 --- !u!114 &4206783951976697725
 MonoBehaviour:
@@ -103,10 +103,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
   m_Name: FullScreenPassRendererFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   injectionPoint: 600
   fetchColorBuffer: 1
-  requirements: 1
+  requirements: 7
   passMaterial: {fileID: 2100000, guid: 910aabaa687711b48bf0a047685f2da0, type: 2}
   passIndex: 0
   bindDepthStencilAttachment: 0
