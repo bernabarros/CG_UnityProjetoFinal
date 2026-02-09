@@ -29,10 +29,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Bias: -0.1
     - _MaxSteps: 64
     - _ShadowStrength: 0.878
     - _Step: 0.05
     - _StepSize: 0.03
+    - _Strength: 0.843
     - _Thickness: 0.5
     m_Colors: []
   m_BuildTextureStacks: []
