@@ -1,17 +1,12 @@
-    // Calculate 3D pixel position using depth buffer
-    // Having calculated the 3D pixel position, shoot a ray to the ligth source or direction 
-    // Raymarching towards the light source if it has been blocked by any geometry its a shadow pixel
-    // Verify in a loop if the depth of the ray is bigger than the value which the depth buffer can see
-    // if yes, the pixel has to be a shadow pixel
-
 Shader "Custom/SSS"
 {
     Properties
     {
         _Strength ("Strength", Range(0, 1)) = 0.8
-        _Step ("Step", Float) = 0.02
-        _MaxSteps ("Max Steps", Int) = 20
+        _Step ("Step", Float) = 0.05 
+        _MaxSteps ("Max Steps", Int) = 40 
         _Thickness ("Thickness", Float) = 0.5
+        _Bias ("Start Bias", Float) = 0.1
     }
 
     SubShader
@@ -30,27 +25,25 @@ Shader "Custom/SSS"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl" 
             
             TEXTURE2D(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
-            float4x4 _CustomInvViewProj; // World Position
-            float3 _CustomLightDir;      // Where is the sun
-
-            // Variables
             float _Strength;
             float _Step;
             int _MaxSteps;
             float _Thickness;
+            float _Bias;
 
-            #define MAX_ITERATION_LIMIT 64 // avoid unroll error
+            #define MAX_ITERATION_LIMIT 64
 
-            struct Attributes // Vertex Input
+            struct Attributes
             {
                 uint vertexID : SV_VertexID;
             };
 
-            struct Varyings // Vertex to Fragment
+            struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
@@ -59,88 +52,87 @@ Shader "Custom/SSS"
             Varyings Vert(Attributes input)
             {
                 Varyings output;
-                
-                float4 pos = GetFullScreenTriangleVertexPosition(input.vertexID); // Clip Space
-                float2 uv  = GetFullScreenTriangleTexCoord(input.vertexID); // UVs
-
-                output.positionCS = pos; // Clip Space Position
-                output.uv = uv; // UVs
-                return output; // Return to Fragment
+                float4 pos = GetFullScreenTriangleVertexPosition(input.vertexID);
+                float2 uv  = GetFullScreenTriangleTexCoord(input.vertexID);
+                output.positionCS = pos;
+                output.uv = uv;
+                return output;
             }
-
             
-            float3 GetWorldPos(float2 uv, float depth) // Reconstruct World Position
+            float3 GetWorldPos(float2 uv, float depth)
             {
-                // Convert UV and Depth to Clip Space
-                float4 clipPos = float4(uv * 2.0 - 1.0, depth, 1.0);
-                // Fix UV starts at top
-                #if UNITY_UV_STARTS_AT_TOP
-                    clipPos.y = -clipPos.y;
-                #endif
-                // Clip space to World space
-                float4 worldPos = mul(_CustomInvViewProj, clipPos);
-                return worldPos.xyz / worldPos.w;
+                return ComputeWorldSpacePosition(uv, depth, unity_MatrixInvVP);
             }
 
             float4 Frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-
-                // Scene Color
                 float4 color = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
-
-                // Sample Depth
                 float depthRaw = SampleSceneDepth(uv);
 
-                #if UNITY_REVERSED_Z // Handle reversed Z buffer
-                    if(depthRaw <= 0.0001) return color; // Early out for skybox
+                #if UNITY_REVERSED_Z
+                    if(depthRaw <= 0.0001) return color;
                 #else
                     if(depthRaw >= 0.9999) return color; 
                 #endif
 
-                // World Position
                 float3 worldPos = GetWorldPos(uv, depthRaw);
+                float3 rayDir = normalize(_MainLightPosition.xyz); 
 
-                // Raymarching Setup
                 float3 rayPos = worldPos;
-                // Verify light direction if its blocked
-                float3 rayDir = _CustomLightDir; 
-                
+
+             
+                rayPos += rayDir * _Bias; 
+
+                rayPos += rayDir * _Step; 
+
                 float shadow = 0.0;
                 
                 [loop]
                 for(int i = 0; i < MAX_ITERATION_LIMIT; i++)
                 {
-                    if(i >= _MaxSteps) break; // Exit based on user setting
+                    if(i >= _MaxSteps) break;
 
-                    
                     rayPos += rayDir * _Step;
 
-                    // Ray Position to Screen UVs
+                
                     float4 clipPos = mul(GetWorldToHClipMatrix(), float4(rayPos, 1.0));
-                    float2 rayUV = (clipPos.xy / clipPos.w) * 0.5 + 0.5;
+                    
+                    
+                    float3 ndc = clipPos.xyz / clipPos.w;
 
-                    // ray off Screen
+
+                    float2 rayUV = ndc.xy;
+                    rayUV.y *= _ProjectionParams.x;
+                    
+                    rayUV = rayUV * 0.5 + 0.5;
+
                     if(rayUV.x < 0 || rayUV.x > 1 || rayUV.y < 0 || rayUV.y > 1) break;
 
-                    float sampleDepth = SampleSceneDepth(rayUV); // Sample Depth at Ray UVs
-                    float sampleLin = LinearEyeDepth(sampleDepth, _ZBufferParams); // Linearize Depth
+                    float sampleDepth = SampleSceneDepth(rayUV);
 
-                    float4 viewPos = mul(GetWorldToViewMatrix(), float4(rayPos, 1.0)); // View Space Position
-                    float rayLin = -viewPos.z; // Linear Depth of Ray Position
+                    #if UNITY_REVERSED_Z
+                        if(sampleDepth <= 0.0001) continue; 
+                    #else
+                        if(sampleDepth >= 0.9999) continue;
+                    #endif
 
-                    float diff = rayLin - sampleLin; // Depth Difference
+                    float sampleLin = LinearEyeDepth(sampleDepth, _ZBufferParams);
+                    float3 viewPos = TransformWorldToView(rayPos);
+                    float rayLin = -viewPos.z; 
 
-                    if(diff > 0.01 && diff < _Thickness) // If blocked
+                    float diff = rayLin - sampleLin;
+
+                    if(diff > 0.01 && diff < _Thickness) 
                     {
-                        shadow = 1.0; // Pixel is a shadow
-                        float edgeFade = 1.0 - pow(length(rayUV * 2.0 - 1.0), 4.0); // Edge Fade
+                        shadow = 1.0;
+                        float edgeFade = 1.0 - pow(length(rayUV * 2.0 - 1.0), 4.0);
                         shadow *= edgeFade;
-                        
-                        break; // block found, stop marching
+                        shadow *= (1.0 - (float(i) / float(_MaxSteps)));
+                        break;
                     }
                 }
-                // if it is a shadow pixel, darken it
+
                 return color * (1.0 - (shadow * _Strength));
             }
             ENDHLSL
