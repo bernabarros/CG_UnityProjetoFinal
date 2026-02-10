@@ -162,10 +162,6 @@ Shader "Custom/SSAO Final"
 
                 float aoFactor = ComputeAO(uv);
                 
-                if (linearDepth > 0.0)
-                {
-                    sceneColor.rgb *= aoFactor;
-                }
                 return sceneColor;
             }
             ENDHLSL
