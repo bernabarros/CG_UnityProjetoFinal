@@ -157,8 +157,6 @@ Shader "Custom/SSAO Final"
 
                 float4 sceneColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
 
-                float linearDepth = GetLinearEyeDepth(uv);
-
                 float aoFactor = ComputeAO(uv);
                 
                 return sceneColor * aoFactor;
