@@ -1,5 +1,17 @@
-Shader "Custom/SSAO 1"
+Shader "Custom/SSAO Final"
 {
+    Properties
+    {
+        _SSAORadius ("Radius", Range(0.1, 5.0)) = 1.0
+        _AOIntensity ("Intensity", Range(0, 4)) = 1.0
+        _AOPower ("Contrast", Range(0.5, 4)) = 1.0
+        _AOBias ("Depth Bias", Range(0.0, 0.1)) = 0.02
+        _AORange ("Range Limit", Range(0.1, 10)) = 2.0
+        _AOFadeStart ("Fade Start", Range(0, 20)) = 5
+        _AOFadeEnd ("Fade End", Range(1, 50)) = 20
+        _SampleCount ("Samples", Range(8, 64)) = 32
+    }
+
     SubShader
     {
         Tags { "RenderPipeline" ="UniversalPipeline" "RenderType"="Opaque"}
@@ -23,9 +35,16 @@ Shader "Custom/SSAO 1"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4x4 _CameraProjectionMatrix;
                 float _SSAORadius;
+                float _AOIntensity;
+                float _AOPower;
+                float _AOBias;
+                float _AORange;
+                float _AOFadeStart;
+                float _AOFadeEnd;
+                int   _SampleCount;
             CBUFFER_END
+
 
 
             float GetLinearEyeDepth(float2 uv)
@@ -72,10 +91,10 @@ Shader "Custom/SSAO 1"
                 float3x3 TangBitNorm = float3x3(tangent, bitangent, normal);
 
                 float occlusion = 0;
-                float bias = 0.02 * _SSAORadius;
+                float bias = _AOBias;
 
-                [unroll]
-                for(int i = 0; i < 64; i++)
+                [unroll(32)]
+                for(int i = 0; i < _SampleCount; i++)
                 {
                     float3 sampleDir = float3(
                         frac(sin(i * 12.9898) * 43758.5453) * 2.0 - 1.0,
@@ -89,7 +108,12 @@ Shader "Custom/SSAO 1"
 
                     sampleDir = mul(TangBitNorm, sampleDir);
 
-                    float scale = float(i) / 64.0;
+                    float NdotS = dot(normal, sampleDir);
+                    if (NdotS < 0.15)
+                        continue;
+
+
+                    float scale = float(i) / _SampleCount;
                     scale = lerp(0.1, 1.0, scale * scale);
 
                     float3 samplePos = viewPos + sampleDir * (_SSAORadius * scale);
@@ -110,12 +134,20 @@ Shader "Custom/SSAO 1"
 
                     float dist = abs(sampleDepth - samplePointDepth);
 
-                    float rangeCheck = 1.0 - smoothstep(0.0, _SSAORadius, dist);
+                    float rangeCheck = 1.0 - smoothstep(0.0, _AORange, dist);
 
                     if(sampleDepth < samplePointDepth - bias)//bias, prevent self occlusion
                         occlusion += rangeCheck;
                 }
-                occlusion = 1.0 - (occlusion / 64.0);
+                occlusion = 1.0 - (occlusion / _SampleCount);
+
+                float viewDepth = -viewPos.z;
+                float fade = smoothstep(_AOFadeEnd, _AOFadeStart, viewDepth);
+                occlusion = lerp(1.0, occlusion, fade);
+
+                occlusion = pow(saturate(occlusion), _AOPower);
+
+                occlusion = lerp(1.0, occlusion, _AOIntensity);
 
                 return saturate(occlusion);
             }
