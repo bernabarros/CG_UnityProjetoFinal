@@ -128,14 +128,13 @@ Shader "Custom/SSAO Final"
 
                     float sampleDepth = GetLinearEyeDepth(sampleUV);
 
-                    // Depth of our sample point along view direction
                     float samplePointDepth = -samplePos.z;
 
                     float dist = abs(sampleDepth - samplePointDepth);
 
                     float rangeCheck = 1.0 - smoothstep(0.0, _AORange, dist);
 
-                    if(sampleDepth < samplePointDepth - bias)//bias, prevent self occlusion
+                    if(sampleDepth < samplePointDepth - bias)
                         occlusion += rangeCheck;
                 }
                 occlusion = 1.0 - (occlusion / _SampleCount);
