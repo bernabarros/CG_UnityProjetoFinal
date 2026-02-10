@@ -68,8 +68,8 @@ Após concluir a iteração fazemos a média para obter o valor de oclusão do p
 
 Adicionámos também forma para remover o efeito para objetos que estão muito longe da câmara e variáveis para aprefeiçoar o efeito.
 
-O resultado do shader é que as zonas que estarão a ser ocludidas estão cobertas por pontos pretos (o *noise*) pois o efeito é inconsistente, enquanto um pixel pode estar ocludido o pixel a seguir pode não estar.
-De modo a resolver, teriamos de criar um efeito *Blur* que iria fazer a média entre os pixeis para igualar os valores de oclusão removendo assim o noise.
+O resultado do shader é que as zonas que estarão a ser ocludidas estão cobertas por pontos pretos (o *noise*) pois o efeito é inconsistente, enquanto um pixel pode estar ocludido o pixel a seguir pode não estar. O SSAO é um efeito que na sua base só dá uma estimativa do que poderá estar a ocludir um pixel, sendo necessário implementar várias maneiras de reduzir as imperfeições do efeito.
+Entre as maneiras que teriamos de melhorar o efeito visual do SSAO, podiamos criar um efeito *Blur* que iria fazer a média entre os pixeis para igualar os valores de oclusão removendo assim o noise.
 
 ### Screen Space Shadows
 
