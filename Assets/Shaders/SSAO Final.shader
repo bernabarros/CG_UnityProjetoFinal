@@ -112,7 +112,6 @@ Shader "Custom/SSAO Final"
                     if (NdotS < 0.15)
                         continue;
 
-
                     float scale = float(i) / _SampleCount;
                     scale = lerp(0.1, 1.0, scale * scale);
 
@@ -162,7 +161,7 @@ Shader "Custom/SSAO Final"
 
                 float aoFactor = ComputeAO(uv);
                 
-                return sceneColor;
+                return sceneColor * aoFactor;
             }
             ENDHLSL
         }
