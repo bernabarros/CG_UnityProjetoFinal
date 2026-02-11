@@ -99,12 +99,9 @@ Caso uma interseção é detetada, a sombra fica como 1.0. Para melhorar a esté
 
 Encontra-mos também exemplos de SSS,
 
-### Screen Space Shadows
-
-![alt text](image-2.png)
-
 ## Conclusão
 
+Em suma, obtemos um algoritmo básico que permite calcular os valores de ocultação numa cena resultando em pixeis que sejam considerados ocultados recebam um efeito de escurecimento sendo necessário implementar um *shader* de *Blur* para melhorar o efeito visual. Por sua vez, obtemos um efeito de *Screen Space Shadows* em que estas são feitas na cena apenas com a informação do ecrã.
 
 ## Referências
 
