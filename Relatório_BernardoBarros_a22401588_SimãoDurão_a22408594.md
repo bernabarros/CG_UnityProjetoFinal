@@ -71,22 +71,33 @@ Adicionámos também forma para remover o efeito para objetos que estão muito l
 O resultado do shader é que as zonas que estarão a ser ocludidas estão cobertas por pontos pretos (o *noise*) pois o efeito é inconsistente, enquanto um pixel pode estar ocludido o pixel a seguir pode não estar. O SSAO é um efeito que na sua base só dá uma estimativa do que poderá estar a ocludir um pixel, sendo necessário implementar várias maneiras de reduzir as imperfeições do efeito.
 Entre as maneiras que teriamos de melhorar o efeito visual do SSAO, podiamos criar um efeito *Blur* que iria fazer a média entre os pixeis para igualar os valores de oclusão removendo assim o noise.
 
-### Screen Space Shadows
+### Screen Space Shadows (Contact Shadows)
 
-Para a implementação da técnica de *Screen Space Shadows* (SSS), partimos com o objetivo de simular o bloqueio da luz direta pelas paredes. Queríamos garantir que ao projetar uma luz direcional nas paredes, as paredes projetassem umas sombras.
+Para a implementação da técnica de *Screen Space Shadows* (SSS), partimos com o objetivo de simular o bloqueio da luz direta pelas paredes. Queríamos garantir que ao projetar uma luz direcional nas paredes, as paredes projetassem umas sombras apenas a usar informação disponível no ecrã.
 
-Na nossa primeira tentativa, Inspiramo-nos a implementação de SSS do proprio Unity que tem a opção de criar *Contact Shadows*. Conseguimos perceber, o que eram e qual era a meta final que queriamos obter para a implementação do nosso proprio shader de *Contact Shadows*.
+Para isso, utilizo uma técnica de *Ray Marching* na *View Space*. Basicamente, ao usar a posição de um pixel, fazemos *steps* de um *ray* para a luz principal do cenário. A cada *step*, ele vai verificar se o *ray* colide com algum objeto presente no Depth Buffer.
 
-Na segunda, criamos o shader e o material para SSS, no inicio, estavamos bastante confusos porque implementamos o shader e ficou simplesmente cinzento não havia luz nem sombra, mas SSS precisa de saber onde está a directional light e que pixeis estão bloqueados da luz.
+No inicio, a reconstrução das posições do pixeis no mundo 3D é essencial. Ao usar GetWorldPos, a função recebe as coordenadas UV e a *raw depth*, essas duas variaveis são obtidas SampleSceneDepth que permite fazer isso.
 
-Na terceira acabamos por descobrir o que era Raymarching e que é essencial para SSS. Isso permite de enviar raios da posição do pixel para a luz e se houver pixeis que bloqueiam esse raio esse pixel será um *shadow pixel*. No shader usa um Depth buffer já que ele não tem acesso á cena em 3D. Por isso, ele recontroi os pixeis da que aparecem na camara para 3D assim pode ver se a luz foi obstruida por um pixel.
+GetWorldPos recorre a ComputeWorldSpacePosition, isso faz a transformação inversa de matriz da projeção da *View*. Faz com que possamos calcular o *pixel* em *World Space*. Para o Contact Shadows funcionar, o vetor crucial _MainLightPosition, ele dá a direção da luz e depois ela é normalizada.
 
+Antes disso, inicializamos a variável *rayPos* com a posição em *World Space* calculada. A esta posição inicial, aplicamos uma correção na direção da luz multiplicado pelo _Bias. Para evitar o *shadow acne*, impedindo que o raio colidir imediatamente com a própria superfície de onde partiu.
+
+Entramos no ciclo, que concretiza o *Ray Marching*. O número máximo de iterações é limitado pela variável _MaxSteps, impedindo que o shader fique as voltas.
+
+A cada iteração, avançamos a posição do raio (graças ao *step*) na direção da luz, que percorre uma distância definida pela variável _Step. O raio move-se em coordenadas de mundo 3D, mas a informação de oclusão está numa textura 2D (Depth Buffer).
+
+Para resolver, temos de projetar a posição atual do raio de volta para o espaço de ecrã a cada passo. Multiplicamos a posição do raio pela *GetWorldToHClipMatrix* para ter a posição em *Clip Space* , convertemos para coordenadas normalizadas, e, depois transformamos em coordenadas UV. Se os UVs saírem do ecrã (0 a 1), interrompemos o ciclo.
+
+Com as coordenadas UV da posição atual do raio, fazemos o *sampling* da profundidade da cena (*SampleSceneDepth*). Para realizar uma comparação válida, convertemos a profundidade amostrada para *Linear Eye Depth*. Depois, transformamos a posição do raio de *World Space* para *View Space* para dar a profundidade linear (rayLin).
+
+O teste de sombra é feito com a diferença (diff) entre a profundidade do raio e a profundidade da *sample*. Se *diff* for maior que um valor mínimo e menor que a *_Thickness* definida, consideramos que houve uma interseção. A variável *_Thickness* define a "espessura" dos objetos, isso evita que superfícies distantes no fundo sejam consideradas como oclusão do raio.
+
+Caso uma interseção é detetada, a sombra fica como 1.0. Para melhorar a estética, aplicamos um *Edge Fade* e diminuimos a sombra com base na distância percorrida pelo raio. O resultado é a cor do *pixel* escurecida pela sombra multiplicado pela *_Strength*.
 
 ![alt text](image-21.png)
 
-A partir dessa ultima tentativa, a implementação de Contact Shadow foi fluida, ao criar um script para o shader saber onde está a camâra e a directional light. Esse script cria uma matriz que manda para o shader a direção da luz e como ele deveria agir sobre isso.
-
-Encontra-mos também exemplos de SSAO e SSS,
+Encontra-mos também exemplos de SSS,
 
 ### Screen Space Shadows
 
