@@ -140,3 +140,7 @@ Em suma, obtemos um algoritmo b√°sico que permite calcular os valores de oculta√
 [Video sobre Ray marching](https://www.youtube.com/watch?v=khblXafu7iA&t=172s)
 
 [SSS em URP](https://docs.unity3d.com/6000.3/Documentation/Manual/urp/renderer-feature-screen-space-shadows.html)
+
+[API Unity para Luz principal](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/use-built-in-shader-methods-lighting.html)
+
+[Variaveis de Shader built-in](https://docs.unity3d.com/2021.2/Documentation/Manual/SL-UnityShaderVariables.html)
